@@ -1,8 +1,12 @@
 package tcpwrite
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"net"
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -103,7 +107,46 @@ func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 		logger.Errorf("Unable to write the data! %s", err.Error())
 		return false, err
 	}
-	ctx.SetOutputObject(output)
 	logger.Infof("Written %d bytes", output.BytesWritten)
+	if a.settings.WaitForReply {
+		output.Data, output.BytesReceived = readData(a.connection)
+		logger.Infof("Received %d bytes", output.BytesReceived)
+	}
+	ctx.SetOutputObject(output)
 	return true, nil
+}
+
+func readData(conn net.Conn) ([]byte, int) {
+	if delimiter != 0 {
+		data, err := bufio.NewReader(conn).ReadBytes(delimiter)
+		if err != nil {
+			errString := err.Error()
+			if !strings.Contains(errString, "use of closed network connection") {
+				logger.Error("Error reading data from connection: ", err.Error())
+			} else {
+				logger.Info("Connection is closed.")
+			}
+			if nerr, ok := err.(net.Error); !ok || !nerr.Timeout() {
+				// Return if not timeout error
+				return nil, len(data)
+			}
+		}
+		return data[:len(data)-1], len(data)
+	}
+	var buf bytes.Buffer
+	_, err := io.Copy(&buf, conn)
+	if err != nil {
+		errString := err.Error()
+		if !strings.Contains(errString, "use of closed network connection") {
+			logger.Error("Error reading data from connection: ", err.Error())
+		} else {
+			logger.Info("Connection is closed.")
+		}
+		if nerr, ok := err.(net.Error); !ok || !nerr.Timeout() {
+			// Return if not timeout error
+			return nil, 0
+		}
+	}
+	data := buf.Bytes()
+	return data, len(data)
 }

@@ -14,6 +14,7 @@ type Settings struct {
 	WriteTimeoutMs  int64  `md:"writeTimeoutMs"` // Write timeout for tcp write in ms
 	Delimiter       string `md:"delimiter"`      // Data delimiter for read and write
 	CustomDelimiter string `md:"customDelimiter"`
+	WaitForReply    bool   `md:"waitForReply"`
 }
 
 // ToMap ...
@@ -25,6 +26,7 @@ func (i *Settings) ToMap() map[string]interface{} {
 		"writeTimeoutMs":  i.WriteTimeoutMs,
 		"delimiter":       i.Delimiter,
 		"customDelimiter": i.CustomDelimiter,
+		"waitForReply":    i.WaitForReply,
 	}
 }
 
@@ -56,6 +58,10 @@ func (i *Settings) FromMap(values map[string]interface{}) error {
 	if err != nil {
 		return err
 	}
+	i.WaitForReply, err = coerce.ToBool(values["waitForReply"])
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -83,13 +89,17 @@ func (i *Input) FromMap(values map[string]interface{}) error {
 
 // Output ...
 type Output struct {
-	BytesWritten int `md:"bytesWritten"`
+	BytesWritten  int    `md:"bytesWritten"`
+	BytesReceived int    `md:"bytesReceived"`
+	Data          []byte `md:"data"`
 }
 
 // ToMap ...
 func (o *Output) ToMap() map[string]interface{} {
 	return map[string]interface{}{
-		"bytesWritten": o.BytesWritten,
+		"bytesWritten":  o.BytesWritten,
+		"bytesReceived": o.BytesReceived,
+		"data":          o.Data,
 	}
 }
 
@@ -97,6 +107,14 @@ func (o *Output) ToMap() map[string]interface{} {
 func (o *Output) FromMap(values map[string]interface{}) error {
 	var err error
 	o.BytesWritten, err = coerce.ToInt(values["bytesWritten"])
+	if err != nil {
+		return err
+	}
+	o.BytesReceived, err = coerce.ToInt(values["bytesReceived"])
+	if err != nil {
+		return err
+	}
+	o.Data, err = coerce.ToBytes(values["data"])
 	if err != nil {
 		return err
 	}

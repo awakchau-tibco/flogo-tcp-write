@@ -1,6 +1,6 @@
 {
   "name": "flogo-tcp-write-activity",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "title": "TCP Write Activity",
   "type": "flogo:activity",
   "description": "Writes data to given TCP connection",
@@ -106,6 +106,19 @@
         "type": "number",
         "visible": true
       }
+    },
+    {
+      "name": "waitForReply",
+      "type": "boolean",
+      "required": false,
+      "value": false,
+      "description": "If true, activity will wait to receive reply/response after sending the data",
+      "display": {
+        "name": "Wait for Reply",
+        "description": "If true, activity will wait to receive reply/response after sending the data",
+        "type": "boolean",
+        "visible": true
+      }
     }
   ],
   "input": [
@@ -121,6 +134,16 @@
       "name": "bytesWritten",
       "type": "int",
       "description": "Number of bytes written"
+    },
+    {
+      "name": "bytesReceived",
+      "type": "int",
+      "description": "Number of bytes received"
+    },
+    {
+      "name": "data",
+      "type": "string",
+      "description": "Received data as response or reply from TCP write operation"
     }
   ]
 }
