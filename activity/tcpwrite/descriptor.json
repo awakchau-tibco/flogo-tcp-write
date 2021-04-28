@@ -1,6 +1,6 @@
 {
   "name": "flogo-tcp-write-activity",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "title": "TCP Write Activity",
   "type": "flogo:activity",
   "description": "Writes data to given TCP connection",
@@ -84,10 +84,10 @@
       "name": "customDelimiter",
       "type": "string",
       "required": false,
-      "description": "If set, this will override the above Delimiter",
+      "description": "Hex code for delimiter character. If set, this will override the above Delimiter",
       "display": {
         "name": "Custom Delimiter",
-        "description": "If set, this will override the above Delimiter",
+        "description": "Hex code for delimiter character. If set, this will override the above Delimiter",
         "type": "string",
         "visible": true,
         "appPropertySupport": true,
@@ -119,6 +119,19 @@
         "type": "boolean",
         "visible": true
       }
+    },
+    {
+      "name": "keepConnectionOpen",
+      "type": "boolean",
+      "required": false,
+      "value": false,
+      "description": "If true, connection will not be closed when activity finished",
+      "display": {
+        "name": "Keep Connection Open",
+        "description": "If true, connection will not be closed when activity finished",
+        "type": "boolean",
+        "visible": true
+      }
     }
   ],
   "input": [
@@ -127,6 +140,12 @@
       "type": "string",
       "required": true,
       "description": "Data to be written"
+    },
+    {
+      "name": "connection",
+      "type": "any",
+      "required": false,
+      "description": "If 'Keep Connection Open' is true, set this to use already opened TCP connection"
     }
   ],
   "output": [
@@ -144,6 +163,11 @@
       "name": "data",
       "type": "string",
       "description": "Received data as response or reply from TCP write operation"
+    },
+    {
+      "name": "connection",
+      "type": "any",
+      "description": "Current TCP connection object. Only if 'Keep Connection Open' is true"
     }
   ]
 }
